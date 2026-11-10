@@ -974,6 +974,13 @@ async function api(payload){
   if (!res.ok) throw new Error('http ' + res.status);
   return res.json();
 }
+async function loadHero(){
+  try { paintNext(await api({ action:'availability', service:'mobile' })); }
+  catch (e) {
+    document.getElementById('nextSlot').textContent = 'Call or text to book';
+    document.getElementById('nextSub').textContent = '(202) 369-2932';
+  }
+}
 async function refreshAvailability(){
   if (!state.service) return;
   try {
@@ -1041,7 +1048,7 @@ function renderSummary(){
   document.getElementById('summary').innerHTML = `
     <h4>Your appointment</h4>
     <div class="row"><span>Service</span><b>${s ? s.name : '—'}</b></div>
-    <div class="row"><span>When</span><b>${state.slot ? new Date(state.slot).toLocaleString('en-US',{weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : '—'}</b></div>
+    <div class="row"><span>When</span><b>${state.slot ? new Date(state.slot).toLocaleString('en-US',{timeZone:'America/Chicago',weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) + ' CT' : '—'}</b></div>
     <div class="row"><span>Where</span><b>${state.loc ? (LOCS.find(l=>l.id===state.loc).name) : '—'}</b></div>
     <div class="row"><span>Travel</span><b>${fee ? money(fee) : 'Included'}</b></div>
     <div class="total"><span>Estimated total</span><b>${money(total)}</b></div>`;
@@ -1132,6 +1139,7 @@ document.getElementById('yr').textContent = new Date().getFullYear();
 const io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting){ en.target.classList.add('on'); io.unobserve(en.target); } }), {threshold:.12, rootMargin:'0px 0px -40px'});
 document.querySelectorAll('.rv').forEach(el => io.observe(el));
 
+loadHero();
 refreshAvailability();
 </script>
 </body>
